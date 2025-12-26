@@ -1,0 +1,19 @@
+{
+  "name": "TinyTrack",
+  "short_name": "TinyTrack",
+  "description": "One-handed baby tracker with local QR sync.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/822/822143.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
