@@ -1,11 +1,10 @@
 
-const CACHE_NAME = 'tinytrack-v3.3.1';
+const CACHE_NAME = 'tinytrack-v3.3.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './metadata.json',
-  './index.js',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'
