@@ -9,7 +9,6 @@ Live at: [tinytrack.farmfresh.rocks](https://tinytrack.farmfresh.rocks)
 - **📱 One-Handed Design**: Large touch targets and bottom-aligned navigation for effortless use.
 - **🔐 Local-First & Private**: All baby data is stored directly on your device via `localStorage`. No cloud accounts, no tracking.
 - **📶 PWA Ready**: Fully functional offline. Install it to your home screen for a native app experience.
-- **🧹 Data Management**: Easily delete individual records or wipe the entire application history for a fresh start.
 - **🤝 Zero-Cloud Sync**: Sync data with a partner using high-density QR codes—no servers or accounts required.
 - **📊 Detailed Analytics**: Visualize milk intake, diaper trends, and growth curves with clean, interactive charts.
 
