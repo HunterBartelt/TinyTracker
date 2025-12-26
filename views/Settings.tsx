@@ -1,5 +1,5 @@
 
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { DataContext } from '../App';
 import { parsePdfImport } from '../geminiService';
 import * as QRCodeModule from 'qrcode';
@@ -14,8 +14,8 @@ const Settings: React.FC = () => {
   if (!context) return null;
   const { data, updateSettings, importLogs } = context;
 
-  const [importing, setImporting] = useState(false);
-  const [importStatus, setImportStatus] = useState('');
+  const [isPdfImporting, setIsPdfImporting] = useState(false);
+  const [pdfImportMessage, setPdfImportMessage] = useState('');
   
   // UI States
   const [modalMode, setModalMode] = useState<'qr-gen' | 'qr-scan' | 'sync-text' | 'result' | null>(null);
@@ -28,6 +28,37 @@ const Settings: React.FC = () => {
   
   const scannerRef = useRef<any>(null);
   const [currentCamera, setCurrentCamera] = useState<"environment" | "user">("environment");
+
+  const handlePdfImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsPdfImporting(true);
+    setPdfImportMessage('Reading PDF data...');
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64 = (reader.result as string).split(',')[1];
+          const parsedData = await parsePdfImport(base64);
+          const { added } = importLogs(parsedData);
+          setPdfImportMessage(`Successfully added ${added} records.`);
+          setTimeout(() => {
+            setIsPdfImporting(false);
+            setPdfImportMessage('');
+          }, 4000);
+        } catch (err: any) {
+          setPdfImportMessage(err.message || 'Failed to parse PDF.');
+          setTimeout(() => setIsPdfImporting(false), 5000);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setIsPdfImporting(false);
+      alert("Error reading file.");
+    }
+  };
 
   /**
    * HYPER-COMPACT CHRONOLOGICAL PROTOCOL (Last 20 Events)
@@ -272,9 +303,9 @@ const Settings: React.FC = () => {
         </div>
       </section>
 
-      {/* Backup Section */}
+      {/* Backup & Import Section */}
       <section className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Safe-Keep Data</h3>
+        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data Management</h3>
         
         <button onClick={downloadBackup} className="w-full p-4 bg-indigo-600 text-white rounded-2xl flex items-center justify-between active:scale-[0.98] transition-all shadow-lg shadow-indigo-100">
           <div className="flex items-center gap-3">
@@ -296,6 +327,22 @@ const Settings: React.FC = () => {
           </div>
           <i className="fas fa-chevron-right text-slate-300 text-xs"></i>
         </button>
+
+        <div className="pt-2">
+          <label className={`w-full p-4 bg-white border-2 border-dashed rounded-2xl flex items-center justify-between cursor-pointer transition-all ${isPdfImporting ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 active:bg-slate-50'}`}>
+            <input type="file" accept="application/pdf" className="hidden" onChange={handlePdfImport} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
+                {isPdfImporting ? <i className="fas fa-circle-notch fa-spin text-indigo-500"></i> : <i className="fas fa-file-pdf text-sm"></i>}
+              </div>
+              <div className="text-left">
+                <span className="text-xs font-black text-slate-800 block">Import from Other App</span>
+                <span className="text-[9px] text-slate-400 font-bold uppercase">{pdfImportMessage || 'Upload PDF export report'}</span>
+              </div>
+            </div>
+            {!isPdfImporting && <i className="fas fa-plus text-slate-300 text-xs"></i>}
+          </label>
+        </div>
       </section>
 
       {/* MODALS */}

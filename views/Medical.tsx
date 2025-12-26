@@ -27,27 +27,27 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800">Care & Growth</h2>
+        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Care & Growth</h2>
         <button 
           onClick={() => setShowAdd(true)}
-          className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100"
+          className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100 active:scale-90 transition-all"
         >
-          <i className="fas fa-plus"></i>
+          <i className="fas fa-plus text-lg"></i>
         </button>
       </div>
 
-      <div className="flex bg-slate-100 p-1 rounded-2xl">
+      <div className="flex bg-slate-100 p-1.5 rounded-2xl">
         <button 
           onClick={() => setActiveTab('medical')}
-          className={`flex-1 py-3 rounded-xl font-bold transition-all ${activeTab === 'medical' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
+          className={`flex-1 py-3 rounded-xl font-black transition-all text-[10px] uppercase tracking-widest ${activeTab === 'medical' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
         >
           Medical
         </button>
         <button 
           onClick={() => setActiveTab('milestones')}
-          className={`flex-1 py-3 rounded-xl font-bold transition-all ${activeTab === 'milestones' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
+          className={`flex-1 py-3 rounded-xl font-black transition-all text-[10px] uppercase tracking-widest ${activeTab === 'milestones' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
         >
           Milestones
         </button>
@@ -65,39 +65,39 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
             data.milestones.sort((a,b) => b.timestamp - a.timestamp).map(log => (
               <TimelineItem key={log.id} title={log.title} date={new Date(log.timestamp).toLocaleDateString()} icon="fa-trophy" color="bg-amber-50 text-amber-500" />
             ))
-          ) : <EmptyState text="No milestones reached yet. You can do it, baby!" />
+          ) : <EmptyState text="No milestones reached yet." />
         )}
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in zoom-in duration-200">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Add {activeTab === 'medical' ? 'Visit' : 'Milestone'}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">What happened?</label>
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-in zoom-in duration-200">
+            <h3 className="text-xl font-black text-slate-800 mb-6 tracking-tight">Add {activeTab === 'medical' ? 'Visit' : 'Milestone'}</h3>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Details</label>
                 <input 
                   type="text" 
                   autoFocus
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="E.g. First Smile, 2 Month Checkup"
-                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="E.g. First Smile"
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
                 />
               </div>
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">When did it happen?</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date</label>
                 <input 
                   type="date" 
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowAdd(false)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">Cancel</button>
-              <button onClick={handleAdd} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold">Save</button>
+            <div className="flex gap-3 mt-10">
+              <button onClick={() => setShowAdd(false)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest">Cancel</button>
+              <button onClick={handleAdd} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100">Save</button>
             </div>
           </div>
         </div>
@@ -107,21 +107,23 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
 };
 
 const TimelineItem: React.FC<{ title: string; date: string; icon: string; color: string }> = ({ title, date, icon, color }) => (
-  <div className="flex items-center gap-4 bg-white p-4 rounded-3xl border border-slate-50 shadow-sm">
-    <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center shrink-0`}>
-      <i className={`fas ${icon}`}></i>
+  <div className="flex items-center gap-5 bg-white p-5 rounded-[32px] border border-slate-50 shadow-sm">
+    <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center shrink-0 shadow-inner`}>
+      <i className={`fas ${icon} text-lg`}></i>
     </div>
     <div className="flex-1">
-      <h3 className="font-bold text-slate-800 text-sm">{title}</h3>
-      <p className="text-xs text-slate-400 font-medium">{date}</p>
+      <h3 className="font-black text-slate-800 text-sm leading-tight mb-0.5">{title}</h3>
+      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{date}</p>
     </div>
   </div>
 );
 
 const EmptyState: React.FC<{ text: string }> = ({ text }) => (
-  <div className="py-20 flex flex-col items-center justify-center text-slate-300">
-    <i className="fas fa-folder-open text-5xl mb-4"></i>
-    <p className="text-sm font-medium">{text}</p>
+  <div className="py-24 flex flex-col items-center justify-center text-slate-300">
+    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+      <i className="fas fa-folder-open text-2xl"></i>
+    </div>
+    <p className="text-[10px] font-black uppercase tracking-widest">{text}</p>
   </div>
 );
 

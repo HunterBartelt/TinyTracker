@@ -2,9 +2,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BabyData, FeedingLog, DiaperLog, SleepLog } from "./types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Safety check for browser environments without process.env
+const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || "";
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export async function parsePdfImport(base64Data: string) {
+  if (!ai) {
+    throw new Error("AI functionality is unavailable (Missing API Key). Manual sync is still available in Settings.");
+  }
+  
   try {
     const prompt = `
       I am uploading a PDF report from a baby tracking app. 
