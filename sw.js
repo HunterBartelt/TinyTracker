@@ -1,8 +1,9 @@
 
-const CACHE_NAME = 'tinytrack-v3.2.1';
+const CACHE_NAME = 'tinytrack-v3.2.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './manifest.json',
   './metadata.json',
   './index.js',
   'https://cdn.tailwindcss.com',
