@@ -1,3 +1,4 @@
+
 # 🍼 TinyTrack
 
 **TinyTrack** is a high-performance, privacy-focused baby tracking application designed for exhausted parents. It features a "one-handed" UI/UX optimized for mobile use, ensuring you can log data while holding a baby.

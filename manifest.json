@@ -1,5 +1,6 @@
 
 {
+  "id": "tinytrack-app-v1",
   "name": "TinyTrack",
   "short_name": "TinyTrack",
   "description": "One-handed baby tracker with local-first privacy.",
@@ -18,7 +19,9 @@
     }
   ],
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#6366f1"
