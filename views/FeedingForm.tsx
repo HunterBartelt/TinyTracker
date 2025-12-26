@@ -1,22 +1,38 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FeedingLog, FeedingType, UserSettings } from '../types';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FeedingLog, FeedingType } from '../types';
+import { DataContext } from '../App';
 
-const FeedingForm: React.FC<{ onSubmit: (log: Omit<FeedingLog, 'id'>) => void; settings: UserSettings }> = ({ onSubmit, settings }) => {
+const FeedingForm: React.FC = () => {
   const navigate = useNavigate();
-  const isMetric = settings.unitSystem === 'metric';
+  const location = useLocation();
+  const context = useContext(DataContext);
+  if (!context) return null;
+  const { saveLog, deleteLog, data } = context;
+  const isMetric = data.settings.unitSystem === 'metric';
+
+  const editLog = location.state?.log as FeedingLog | undefined;
+  const isEditing = !!editLog;
   
-  const [type, setType] = useState<FeedingType>('bottle');
-  const [displayAmount, setDisplayAmount] = useState(isMetric ? 120 : 4); // ml or oz
-  const [leftMin, setLeftMin] = useState(10);
-  const [rightMin, setRightMin] = useState(10);
-  const [customTime, setCustomTime] = useState(new Date().toISOString().slice(0, 16));
+  const [type, setType] = useState<FeedingType>(editLog?.type || 'bottle');
+  const [displayAmount, setDisplayAmount] = useState(
+    editLog?.amountMl 
+      ? (isMetric ? editLog.amountMl : parseFloat((editLog.amountMl / 29.57).toFixed(1)))
+      : (isMetric ? 120 : 4)
+  );
+  const [leftMin, setLeftMin] = useState(editLog?.leftMinutes || 10);
+  const [rightMin, setRightMin] = useState(editLog?.rightMinutes || 10);
+  const [customTime, setCustomTime] = useState(
+    editLog ? new Date(editLog.timestamp < 1000000000000 ? editLog.timestamp * 1000 : editLog.timestamp).toISOString().slice(0, 16)
+            : new Date().toISOString().slice(0, 16)
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amountMl = isMetric ? displayAmount : displayAmount * 29.57;
-    onSubmit({
+    saveLog('feedings', {
+      id: editLog?.id,
       timestamp: new Date(customTime).getTime(),
       type,
       amountMl: type === 'bottle' ? Math.round(amountMl) : undefined,
@@ -26,10 +42,17 @@ const FeedingForm: React.FC<{ onSubmit: (log: Omit<FeedingLog, 'id'>) => void; s
     navigate('/');
   };
 
+  const handleDelete = () => {
+    if (editLog && window.confirm('Delete this record permanently?')) {
+      deleteLog('feedings', editLog.id);
+      navigate('/');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Feeding</h2>
+        <h2 className="text-2xl font-bold text-slate-800">{isEditing ? 'Edit Feeding' : 'Feeding'}</h2>
         <button onClick={() => navigate(-1)} className="text-slate-400 p-2"><i className="fas fa-times text-xl"></i></button>
       </div>
 
@@ -58,7 +81,7 @@ const FeedingForm: React.FC<{ onSubmit: (log: Omit<FeedingLog, 'id'>) => void; s
         />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8 pb-10">
         {type === 'bottle' ? (
           <div className="flex flex-col items-center gap-6">
             <div className="relative w-40 h-40 rounded-full border-8 border-indigo-50 flex flex-col items-center justify-center">
@@ -86,12 +109,24 @@ const FeedingForm: React.FC<{ onSubmit: (log: Omit<FeedingLog, 'id'>) => void; s
           </div>
         )}
 
-        <button 
-          type="submit" 
-          className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-indigo-200 active:scale-[0.98] transition-all"
-        >
-          Save Log
-        </button>
+        <div className="space-y-3">
+          <button 
+            type="submit" 
+            className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-indigo-200 active:scale-[0.98] transition-all"
+          >
+            {isEditing ? 'Update Record' : 'Save Log'}
+          </button>
+          
+          {isEditing && (
+            <button 
+              type="button" 
+              onClick={handleDelete}
+              className="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-black text-sm active:bg-rose-100 transition-all border border-rose-100/50"
+            >
+              Delete Record
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

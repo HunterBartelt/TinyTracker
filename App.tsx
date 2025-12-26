@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { BabyData, FeedingLog, DiaperLog, SleepLog, GrowthLog, MedicalLog, MilestoneLog, UserSettings } from './types';
 import Home from './views/Home';
@@ -13,13 +13,15 @@ import Settings from './views/Settings';
 
 const STORAGE_KEY = 'tinytrack_data_v5';
 
-// Simple compatible ID generator for mobile
 const generateId = () => Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 
 interface DataContextType {
   data: BabyData;
   updateSettings: (s: Partial<UserSettings>) => void;
   importLogs: (newData: Partial<BabyData>) => { added: number };
+  deleteLog: (category: keyof BabyData, id: string) => void;
+  saveLog: (category: keyof BabyData, log: any) => void;
+  clearAllData: () => void;
 }
 
 export const DataContext = createContext<DataContextType | null>(null);
@@ -53,9 +55,53 @@ const App: React.FC = () => {
     setData(prev => ({ ...prev, settings: { ...prev.settings, ...newSettings } }));
   };
 
+  const deleteLog = (category: keyof BabyData, id: string) => {
+    setData(prev => {
+      const target = prev[category];
+      if (!Array.isArray(target)) return prev;
+      return {
+        ...prev,
+        [category]: target.filter((item: any) => item.id !== id)
+      };
+    });
+  };
+
+  const saveLog = (category: keyof BabyData, log: any) => {
+    setData(prev => {
+      const target = prev[category] as any[];
+      const isUpdate = !!log.id;
+      const finalLog = isUpdate ? log : { ...log, id: generateId() };
+      
+      let newList;
+      if (isUpdate) {
+        newList = target.map(item => item.id === log.id ? finalLog : item);
+      } else {
+        newList = [...target, finalLog];
+      }
+      
+      // Keep sorted by time
+      newList.sort((a, b) => (a.timestamp || a.startTime) - (b.timestamp || b.startTime));
+      
+      return { ...prev, [category]: newList };
+    });
+  };
+
+  const clearAllData = () => {
+    const base: BabyData = {
+      feedings: [],
+      diapers: [],
+      sleep: [],
+      growth: [],
+      medical: [],
+      milestones: [],
+      settings: { unitSystem: 'metric' }
+    };
+    setData(base);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const importLogs = (newData: Partial<BabyData>) => {
     let totalAdded = 0;
-    
     setData(prev => {
       const ensureMs = (t: any) => {
         const num = Number(t);
@@ -65,7 +111,6 @@ const App: React.FC = () => {
 
       const merge = (existing: any[], incoming: any[] = []) => {
         if (!incoming || !Array.isArray(incoming)) return existing;
-        
         const existingIds = new Set(existing.map(e => e.id).filter(Boolean));
         const existingTimes = new Set(existing.map(e => ensureMs(e.timestamp || e.startTime || 0)));
         
@@ -74,13 +119,11 @@ const App: React.FC = () => {
           .map(item => {
             const timeField = item.timestamp ? 'timestamp' : 'startTime';
             const endField = item.endTime ? 'endTime' : null;
-            
             const newItem = {
               ...item,
               id: item.id || generateId(),
               [timeField]: ensureMs(item[timeField])
             };
-
             if (endField && item[endField]) {
               newItem[endField] = ensureMs(item[endField]);
             }
@@ -106,36 +149,11 @@ const App: React.FC = () => {
         milestones: merge(prev.milestones, newData.milestones),
       };
     });
-
     return { added: totalAdded };
   };
 
-  const addFeeding = (log: Omit<FeedingLog, 'id'>) => {
-    setData(prev => ({ ...prev, feedings: [...prev.feedings, { ...log, id: generateId() }] }));
-  };
-
-  const addDiaper = (log: Omit<DiaperLog, 'id'>) => {
-    setData(prev => ({ ...prev, diapers: [...prev.diapers, { ...log, id: generateId() }] }));
-  };
-
-  const addSleep = (log: Omit<SleepLog, 'id'>) => {
-    setData(prev => ({ ...prev, sleep: [...prev.sleep, { ...log, id: generateId() }] }));
-  };
-
-  const addGrowth = (log: Omit<GrowthLog, 'id'>) => {
-    setData(prev => ({ ...prev, growth: [...prev.growth, { ...log, id: generateId() }] }));
-  };
-
-  const addMedical = (log: Omit<MedicalLog, 'id'>) => {
-    setData(prev => ({ ...prev, medical: [...prev.medical, { ...log, id: generateId() }] }));
-  };
-
-  const addMilestone = (log: Omit<MilestoneLog, 'id'>) => {
-    setData(prev => ({ ...prev, milestones: [...prev.milestones, { ...log, id: generateId() }] }));
-  };
-
   return (
-    <DataContext.Provider value={{ data, updateSettings, importLogs }}>
+    <DataContext.Provider value={{ data, updateSettings, importLogs, deleteLog, saveLog, clearAllData }}>
       <Router>
         <div className="flex flex-col min-h-screen max-w-4xl mx-auto bg-white shadow-2xl relative overflow-hidden transition-all duration-500">
           <header className="px-6 pt-10 pb-6 bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 flex justify-between items-center">
@@ -150,17 +168,17 @@ const App: React.FC = () => {
           <main className="flex-1 overflow-y-auto pb-44 px-6 pt-6">
             <Routes>
               <Route path="/" element={<Home data={data} />} />
-              <Route path="/feed" element={<FeedingForm onSubmit={addFeeding} settings={data.settings} />} />
-              <Route path="/diaper" element={<DiaperForm onSubmit={addDiaper} />} />
-              <Route path="/sleep" element={<SleepForm currentSleep={data.sleep.find(s => !s.endTime)} onSubmit={addSleep} onUpdate={(id, end) => {
+              <Route path="/feed" element={<FeedingForm />} />
+              <Route path="/diaper" element={<DiaperForm />} />
+              <Route path="/sleep" element={<SleepForm currentSleep={data.sleep.find(s => !s.endTime)} onUpdate={(id, end) => {
                 setData(prev => ({
                   ...prev,
                   sleep: prev.sleep.map(s => s.id === id ? { ...s, endTime: end } : s)
                 }));
               }} />} />
-              <Route path="/growth" element={<GrowthForm onSubmit={addGrowth} settings={data.settings} />} />
+              <Route path="/growth" element={<GrowthForm />} />
               <Route path="/stats" element={<Stats data={data} />} />
-              <Route path="/medical" element={<Medical data={data} onAddMedical={addMedical} onAddMilestone={addMilestone} />} />
+              <Route path="/medical" element={<Medical data={data} />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

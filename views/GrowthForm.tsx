@@ -1,29 +1,50 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GrowthLog, UserSettings } from '../types';
+import React, { useState, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { GrowthLog } from '../types';
+import { DataContext } from '../App';
 
-const GrowthForm: React.FC<{ onSubmit: (log: Omit<GrowthLog, 'id'>) => void; settings: UserSettings }> = ({ onSubmit, settings }) => {
+const GrowthForm: React.FC = () => {
   const navigate = useNavigate();
-  const isMetric = settings.unitSystem === 'metric';
+  const location = useLocation();
+  const context = useContext(DataContext);
+  if (!context) return null;
+  const { saveLog, deleteLog, data } = context;
+  const isMetric = data.settings.unitSystem === 'metric';
+
+  const editLog = location.state?.log as GrowthLog | undefined;
+  const isEditing = !!editLog;
   
-  const [displayWeight, setDisplayWeight] = useState(isMetric ? 4.5 : 10);
-  const [customTime, setCustomTime] = useState(new Date().toISOString().slice(0, 16));
+  const [displayWeight, setDisplayWeight] = useState(
+    editLog ? (isMetric ? editLog.weightKg : editLog.weightKg * 2.20462) : (isMetric ? 4.5 : 10)
+  );
+  const [customTime, setCustomTime] = useState(
+    editLog ? new Date(editLog.timestamp < 1000000000000 ? editLog.timestamp * 1000 : editLog.timestamp).toISOString().slice(0, 16)
+            : new Date().toISOString().slice(0, 16)
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const weightKg = isMetric ? displayWeight : displayWeight / 2.20462;
-    onSubmit({ 
+    saveLog('growth', { 
+      id: editLog?.id,
       timestamp: new Date(customTime).getTime(), 
       weightKg: weightKg 
     });
     navigate('/');
   };
 
+  const handleDelete = () => {
+    if (editLog && window.confirm('Delete this growth record permanently?')) {
+      deleteLog('growth', editLog.id);
+      navigate('/');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Growth</h2>
+        <h2 className="text-2xl font-bold text-slate-800">{isEditing ? 'Edit Growth' : 'Growth'}</h2>
         <button onClick={() => navigate(-1)} className="text-slate-400 p-2"><i className="fas fa-times text-xl"></i></button>
       </div>
 
@@ -62,12 +83,24 @@ const GrowthForm: React.FC<{ onSubmit: (log: Omit<GrowthLog, 'id'>) => void; set
          </div>
       </div>
 
-      <button 
-        onClick={handleSubmit}
-        className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-emerald-100 mt-4 active:scale-95 transition-all"
-      >
-        Save Weight
-      </button>
+      <div className="space-y-3 pb-10">
+        <button 
+          onClick={handleSubmit}
+          className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-emerald-100 mt-4 active:scale-95 transition-all"
+        >
+          {isEditing ? 'Update Record' : 'Save Weight'}
+        </button>
+        
+        {isEditing && (
+          <button 
+            type="button" 
+            onClick={handleDelete}
+            className="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-black text-sm active:bg-rose-100 transition-all border border-rose-100/50"
+          >
+            Delete Record
+          </button>
+        )}
+      </div>
     </div>
   );
 };

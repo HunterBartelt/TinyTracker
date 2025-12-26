@@ -1,26 +1,46 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { DiaperLog, DiaperType } from '../types';
+import { DataContext } from '../App';
 
-const DiaperForm: React.FC<{ onSubmit: (log: Omit<DiaperLog, 'id'>) => void }> = ({ onSubmit }) => {
+const DiaperForm: React.FC = () => {
   const navigate = useNavigate();
-  const [type, setType] = useState<DiaperType>('wet');
-  const [customTime, setCustomTime] = useState(new Date().toISOString().slice(0, 16));
+  const location = useLocation();
+  const context = useContext(DataContext);
+  if (!context) return null;
+  const { saveLog, deleteLog } = context;
+
+  const editLog = location.state?.log as DiaperLog | undefined;
+  const isEditing = !!editLog;
+
+  const [type, setType] = useState<DiaperType>(editLog?.type || 'wet');
+  const [customTime, setCustomTime] = useState(
+    editLog ? new Date(editLog.timestamp < 1000000000000 ? editLog.timestamp * 1000 : editLog.timestamp).toISOString().slice(0, 16)
+            : new Date().toISOString().slice(0, 16)
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ 
+    saveLog('diapers', { 
+      id: editLog?.id,
       timestamp: new Date(customTime).getTime(), 
       type 
     });
     navigate('/');
   };
 
+  const handleDelete = () => {
+    if (editLog && window.confirm('Delete this record permanently?')) {
+      deleteLog('diapers', editLog.id);
+      navigate('/');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Diaper Change</h2>
+        <h2 className="text-2xl font-bold text-slate-800">{isEditing ? 'Edit Diaper' : 'Diaper Change'}</h2>
         <button onClick={() => navigate(-1)} className="text-slate-400 p-2"><i className="fas fa-times text-xl"></i></button>
       </div>
 
@@ -64,12 +84,24 @@ const DiaperForm: React.FC<{ onSubmit: (log: Omit<DiaperLog, 'id'>) => void }> =
         />
       </div>
 
-      <button 
-        onClick={handleSubmit}
-        className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-indigo-200 active:scale-[0.98] transition-all"
-      >
-        Log Change
-      </button>
+      <div className="space-y-3 pb-10">
+        <button 
+          onClick={handleSubmit}
+          className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg shadow-xl shadow-indigo-200 active:scale-[0.98] transition-all"
+        >
+          {isEditing ? 'Update Record' : 'Log Change'}
+        </button>
+        
+        {isEditing && (
+          <button 
+            type="button" 
+            onClick={handleDelete}
+            className="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-black text-sm active:bg-rose-100 transition-all border border-rose-100/50"
+          >
+            Delete Record
+          </button>
+        )}
+      </div>
     </div>
   );
 };

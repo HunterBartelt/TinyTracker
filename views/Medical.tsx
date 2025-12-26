@@ -1,14 +1,13 @@
 
-import React, { useState } from 'react';
-import { BabyData, MedicalLog, MilestoneLog } from '../types';
+import React, { useState, useContext } from 'react';
+import { BabyData } from '../types';
+import { DataContext } from '../App';
 
-interface MedicalProps {
-  data: BabyData;
-  onAddMedical: (log: Omit<MedicalLog, 'id'>) => void;
-  onAddMilestone: (log: Omit<MilestoneLog, 'id'>) => void;
-}
+const Medical: React.FC<{ data: BabyData }> = ({ data }) => {
+  const context = useContext(DataContext);
+  if (!context) return null;
+  const { saveLog, deleteLog } = context;
 
-const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone }) => {
   const [activeTab, setActiveTab] = useState<'medical' | 'milestones'>('medical');
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -18,12 +17,18 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
     if (!newTitle) return;
     const timestamp = new Date(newDate).getTime() + (12 * 60 * 60 * 1000); // Noon default
     if (activeTab === 'medical') {
-      onAddMedical({ timestamp, type: 'visit', title: newTitle });
+      saveLog('medical', { timestamp, type: 'visit', title: newTitle });
     } else {
-      onAddMilestone({ timestamp, title: newTitle });
+      saveLog('milestones', { timestamp, title: newTitle });
     }
     setNewTitle('');
     setShowAdd(false);
+  };
+
+  const handleDelete = (category: 'medical' | 'milestones', id: string) => {
+    if (window.confirm('Delete this record permanently?')) {
+      deleteLog(category, id);
+    }
   };
 
   return (
@@ -57,13 +62,13 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
         {activeTab === 'medical' ? (
           data.medical.length > 0 ? (
             data.medical.sort((a,b) => b.timestamp - a.timestamp).map(log => (
-              <TimelineItem key={log.id} title={log.title} date={new Date(log.timestamp).toLocaleDateString()} icon="fa-stethoscope" color="bg-rose-50 text-rose-500" />
+              <TimelineItem key={log.id} title={log.title} date={new Date(log.timestamp).toLocaleDateString()} icon="fa-stethoscope" color="bg-rose-50 text-rose-500" onDelete={() => handleDelete('medical', log.id)} />
             ))
           ) : <EmptyState text="No medical visits logged yet." />
         ) : (
           data.milestones.length > 0 ? (
             data.milestones.sort((a,b) => b.timestamp - a.timestamp).map(log => (
-              <TimelineItem key={log.id} title={log.title} date={new Date(log.timestamp).toLocaleDateString()} icon="fa-trophy" color="bg-amber-50 text-amber-500" />
+              <TimelineItem key={log.id} title={log.title} date={new Date(log.timestamp).toLocaleDateString()} icon="fa-trophy" color="bg-amber-50 text-amber-500" onDelete={() => handleDelete('milestones', log.id)} />
             ))
           ) : <EmptyState text="No milestones reached yet." />
         )}
@@ -106,8 +111,8 @@ const Medical: React.FC<MedicalProps> = ({ data, onAddMedical, onAddMilestone })
   );
 };
 
-const TimelineItem: React.FC<{ title: string; date: string; icon: string; color: string }> = ({ title, date, icon, color }) => (
-  <div className="flex items-center gap-5 bg-white p-5 rounded-[32px] border border-slate-50 shadow-sm">
+const TimelineItem: React.FC<{ title: string; date: string; icon: string; color: string; onDelete: () => void }> = ({ title, date, icon, color, onDelete }) => (
+  <div className="flex items-center gap-5 bg-white p-5 rounded-[32px] border border-slate-50 shadow-sm relative group">
     <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center shrink-0 shadow-inner`}>
       <i className={`fas ${icon} text-lg`}></i>
     </div>
@@ -115,6 +120,9 @@ const TimelineItem: React.FC<{ title: string; date: string; icon: string; color:
       <h3 className="font-black text-slate-800 text-sm leading-tight mb-0.5">{title}</h3>
       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{date}</p>
     </div>
+    <button onClick={onDelete} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-200 hover:text-rose-400 active:text-rose-500 transition-colors">
+      <i className="fas fa-trash-can text-xs"></i>
+    </button>
   </div>
 );
 
