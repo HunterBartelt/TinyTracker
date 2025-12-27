@@ -1,6 +1,6 @@
 # 🍼 TinyTrack
 
-**TinyTrack** is a high-performance, baby tracking application designed for exhausted parents. It features a "one-handed" UI/UX optimized for mobile use, ensuring you can log data while holding a baby
+**TinyTrack** is a high-performance, baby tracking application designed for exhausted parents. It features a "one-handed" UI/UX optimized for mobile use, ensuring you can log data while holding a baby.
 
 Live at: [tinytrack.farmfresh.rocks](https://tinytrack.farmfresh.rocks)
 
