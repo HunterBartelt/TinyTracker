@@ -5,7 +5,7 @@
   "description": "One-handed baby tracker with local-first privacy and zero-cloud sync.",
   "icons": [
       {
-      "src": "./icon-512.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
