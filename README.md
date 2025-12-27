@@ -1,14 +1,12 @@
-
 # 🍼 TinyTrack
 
-**TinyTrack** is a high-performance, privacy-focused baby tracking application designed for exhausted parents. It features a "one-handed" UI/UX optimized for mobile use, ensuring you can log data while holding a baby.
+**TinyTrack** is a high-performance, baby tracking application designed for exhausted parents. It features a "one-handed" UI/UX optimized for mobile use, ensuring you can log data while holding a baby.
 
 Live at: [tinytrack.farmfresh.rocks](https://tinytrack.farmfresh.rocks)
 
 ## ✨ Features
 
 - **📱 One-Handed Design**: Large touch targets and bottom-aligned navigation for effortless use.
-- **🔐 Local-First & Private**: All baby data is stored directly on your device via `localStorage`. No cloud accounts, no tracking.
 - **📶 PWA Ready**: Fully functional offline. Install it to your home screen for a native app experience.
 - **🤝 Zero-Cloud Sync**: Sync data with a partner using high-density QR codes—no servers or accounts required.
 - **📊 Detailed Analytics**: Visualize milk intake, diaper trends, and growth curves with clean, interactive charts.

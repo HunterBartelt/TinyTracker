@@ -1,4 +1,3 @@
-
 {
   "id": "tinytrack-app-v1",
   "name": "TinyTrack",
@@ -6,13 +5,13 @@
   "description": "One-handed baby tracker with local-first privacy and zero-cloud sync.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3069/3069172.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3069/3069172.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -20,34 +19,18 @@
   ],
   "screenshots": [
     {
-      "src": "https://images.unsplash.com/photo-1555252333-9f8e92e65ee9?auto=format&fit=crop&q=80&w=1080",
+      "src": "screenshot-mobile.png",
       "sizes": "1080x1920",
-      "type": "image/jpeg",
+      "type": "image/png",
       "form_factor": "narrow",
-      "label": "Home view for easy tracking"
+      "label": "Track feedings and diapers with one hand"
     },
     {
-      "src": "https://images.unsplash.com/photo-1555252333-9f8e92e65ee9?auto=format&fit=crop&q=80&w=1920",
+      "src": "screenshot-desktop.png",
       "sizes": "1920x1080",
-      "type": "image/jpeg",
+      "type": "image/png",
       "form_factor": "wide",
-      "label": "Analytics and growth trends"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Log Feeding",
-      "short_name": "Feed",
-      "description": "Log a new bottle or nursing session",
-      "url": "/#/feed",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3069/3069172.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "View Stats",
-      "short_name": "Stats",
-      "description": "Check daily trends",
-      "url": "/#/stats",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3069/3069172.png", "sizes": "192x192" }]
+      "label": "Analyze growth trends and daily statistics"
     }
   ],
   "start_url": "./index.html",
