@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tinytrack-v3.4.1';
+const CACHE_NAME = 'tinytrack-v3.5.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
